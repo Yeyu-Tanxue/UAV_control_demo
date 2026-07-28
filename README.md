@@ -19,4 +19,10 @@
 - `PROJECT_NOTES.md`：逐个项目的复用点、限制和许可证说明；
 - `reuse-matrix.csv`：可排序、可继续补充的项目复用矩阵。
 
+X500 Demo 的采购清单和二手价格核验见
+[`output/采购套件价格核验表.csv`](output/采购套件价格核验表.csv)。表格沿用原
+`UAV_control` 项目的六列采购核验格式。更细的价格依据和逐项新旧区间保存在
+[`docs/research/hardware/x500-demo-cost.csv`](docs/research/hardware/x500-demo-cost.csv)。
+两张表均以 2026-07-29 可查的厂商价格为锚点，二手价格是采购预算估算，不是实时成交报价。
+
 本仓库不直接收录第三方项目源码。后续确需复制或修改代码时，必须先核对项目许可证、具体文件版权声明和版本，再保留相应归属信息。
