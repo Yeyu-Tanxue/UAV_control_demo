@@ -15,3 +15,11 @@ C,PX4-Avoidance,https://github.com/PX4/PX4-Avoidance,避障背景,"PX4;ROS;MAVRO
 C,ThermalDrone,https://github.com/jacobfeldgoise/ThermalDrone,伴随计算机历史案例,"3DR Solo;DroneKit;Raspberry Pi Zero;Camera",否,"只参考树莓派到飞控的职责划分",未声明,"硬件和软件过旧且无许可证",排除
 C,MAVSDK Drone Show,https://github.com/alireza787b/mavsdk_drone_show,SITL与运行治理,"PX4;MAVSDK;Multi-drone;GCS",否,"只参考 SITL 验证和安全文档","PolyForm/Commercial multi-license","规模和许可证复杂",排除
 C,Ultralytics,https://github.com/ultralytics/ultralytics,目标检测候选,"YOLO;PyTorch;ONNX;NCNN",否,"以后需要目标检测时重新评估","AGPL-3.0/Commercial","当前任务不需要检测且 ARM 版本组合需实测",暂不采用
+B,iq_gnc,https://github.com/Intelligent-Quads/iq_gnc,视觉事件触发任务,"ArduPilot;ROS;MAVROS;Python;C++",局部,"借鉴检测事件驱动任务状态迁移",MIT,"飞控栈不同且示例动作是降落",只复用任务结构
+B,PX4 ROS 2 Interface Library,https://github.com/Auterion/px4-ros2-interface-lib,状态机与控制权,"PX4;ROS2;C++;Python bindings",局部,"借鉴 Mode Executor 完成回调和失败中止",BSD-3-Clause,"引入 ROS2 和动态模式注册会使 Demo 过重",只复用状态机语义
+B,autonomous_landing_uav,https://github.com/MikeS96/autonomous_landing_uav,感知控制分层,"PX4;Gazebo;ROS;MAVROS;OpenCV",局部,"借鉴 offboard/detector/controller 包边界",MIT,"着陆算法和旧 ROS 环境不适用",只复用模块边界
+B,Tello-Python,https://github.com/dji-sdk/Tello-Python,识别绑定离散动作,"Tello;Python2.7;H264;Pose Recognition",否,"参考单帧识别到飞行命令的最小流程",MIT,"非 PX4 且技术栈过旧",只作流程参考
+C,Prometheus,https://github.com/amov-lab/Prometheus,自主无人机平台背景,"PX4;ROS;MAVROS;Gazebo;Detection;Planning",否,"参考中文资料和控制/检测/仿真模块划分","Apache-2.0 标识与 README 非商用表述冲突","规模过大且许可证表述需澄清",禁止复制源码
+C,CERLAB-UAV-Autonomy,https://github.com/Zhefan-Xu/CERLAB-UAV-Autonomy,模块化自主飞行背景,"PX4;ROS;MAVROS;Gazebo;Detection;Planning",否,"参考顶层任务与检测/控制/仿真的边界",MIT,"子模块多且依赖旧 ROS",只复用设计
+C,Aerostack2,https://github.com/aerostack2/aerostack2,任务编排背景,"ROS2;C++;Python;Behavior Tree;Simulation",否,"参考平台层、行为层和任务层分离",BSD-3-Clause,"多机和行为树框架远超需求",只复用设计
+C,GRVC UAL,https://github.com/grvcTeam/grvc-ual,飞控后端抽象,"ROS;PX4;ArduPilot;DJI;Crazyflie;Simulation",否,"参考统一 FlightController 接口和可替换后端",MIT,"版本较旧且多后端实现不需要",只复用接口思想

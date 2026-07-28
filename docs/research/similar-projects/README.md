@@ -1,6 +1,6 @@
 # 相似项目调研与复用建议
 
-调研日期：2026-07-28
+调研日期：2026-07-28；第二轮补充：2026-07-29
 
 ## 1. 调研目标
 
@@ -39,6 +39,20 @@ PX4 起飞
 | 模块边界与安全门 | [PixEagle](https://github.com/alireza787b/PixEagle) | 相机、识别器、控制意图和真实飞控发布分离；识别失败不得触发前飞 |
 
 这五项中，MAVSDK-Python、PX4-gazebo-models、Picamera2 和 TensorFlow Examples 都有明确的宽松许可证，可以作为优先阅读和后续小范围复用对象。PixEagle 也采用 Apache-2.0，但系统规模很大，只建议参考接口分层、安全闭锁和配置组织。
+
+### 第二轮补搜结论
+
+在排除首轮 16 个项目后，又筛出 8 个值得保留的仓库。新增项目中，真正贴近“识别事件触发下一段飞行”的有两个：
+
+- [Intelligent-Quads/iq_gnc](https://github.com/Intelligent-Quads/iq_gnc)：示例任务会持续搜索，直到 YOLO 检测到人，再触发降落。飞控是 ArduPilot，但“感知发布事件，任务状态机决定动作”的结构与本 Demo 高度相似；
+- [dji-sdk/Tello-Python](https://github.com/dji-sdk/Tello-Python)：官方示例把姿态识别结果绑定到飞行命令，证明“取帧—识别—离散动作”可以用很小的程序完成；但它基于 Python 2.7 和 Tello，只作流程参考。
+
+另有两个项目特别适合校正状态机和模块边界：
+
+- [Auterion/px4-ros2-interface-lib](https://github.com/Auterion/px4-ros2-interface-lib)：`Mode Executor` 本身就是“启动模式并等待完成”的状态机，且明确处理控制权移交和失效保护；
+- [MikeS96/autonomous_landing_uav](https://github.com/MikeS96/autonomous_landing_uav)：把 Offboard、目标检测和控制器拆成三个 ROS 包，可参考感知与飞控之间的消息契约。
+
+第二轮没有改变首选技术路线：第一版仍应使用 MAVSDK-Python + 单帧 TFLite 分类 + 小型显式状态机，不应为了复用上述项目而引入 ROS。
 
 ## 3. 建议保留的最小架构
 
@@ -117,6 +131,18 @@ DemoMission
    - 借鉴“检测器可替换”和“确定性试验模式”；
    - 不使用 Tello 控制层、连续避障算法和旧版 YOLO/TensorFlow 配置。
 
+5. **iq_gnc**
+   - 借鉴“感知事件触发任务动作”和 ROS 订阅者向任务层传递检测结果；
+   - 不引入 ArduPilot、MAVROS 和搜索救援任务本身。
+
+6. **PX4 ROS 2 Interface Library**
+   - 借鉴 `Mode Executor` 的异步完成回调、状态失败中止和控制权可被人工接管的原则；
+   - 当前 Demo 不切换到 ROS 2/C++，只把这些原则落实到 Python 状态机。
+
+7. **Autonomous Landing UAV**
+   - 借鉴 `offboard / detector / controller` 三层拆分和检测结果经过明确消息契约再进入控制器；
+   - 不复用降落 PID、旧 ROS 环境或特征点跟踪算法。
+
 ## 5. 明确不在第一版复用的内容
 
 - ROS 2、MAVROS、Micro XRCE-DDS；
@@ -126,6 +152,7 @@ DemoMission
 - 多机编队、任务规划和搜索救援框架；
 - IMX500、Coral、Jetson 等硬件加速器的专用代码；
 - 第三方仓库中没有明确许可证的源码。
+- 大型自主飞行框架的全量安装、子模块和行为树运行时。
 
 这些能力不是永久排除，只是不属于“悬停—识别—前飞”的第一版 Demo。
 

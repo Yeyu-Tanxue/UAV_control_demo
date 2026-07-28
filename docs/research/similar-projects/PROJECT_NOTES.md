@@ -226,6 +226,136 @@
   - 树莓派 NCNN/ARM 组合曾出现版本兼容问题，必须单独锁定和实测。
 - 结论：**若以后从分类升级为目标检测，再单独立项评估**。
 
+## D. 第二轮补充：事件触发、状态机与模块边界
+
+### 17. Intelligent-Quads/iq_gnc
+
+- 项目：[Intelligent-Quads/iq_gnc](https://github.com/Intelligent-Quads/iq_gnc)
+- 技术：ArduPilot、ROS、MAVROS、Python/C++
+- 许可证：MIT
+- 与本 Demo 最相关的内容：
+  - `sr_sol.cpp` 示例会执行搜索航线，直到 YOLO 检测到人，再触发降落；
+  - 提供高层航点、模式切换和状态读取函数；
+  - 另有订阅者示例，展示外部感知结果如何进入飞行任务节点。
+- 值得借鉴：
+  - 检测器只发布“已检测”事实，任务层负责决定飞行动作；
+  - 事件在状态机中只消费一次，防止同一检测结果重复触发；
+  - 飞行动作完成后再进入下一次感知阶段。
+- 不照搬：
+  - ArduPilot/MAVROS 控制层；
+  - 搜索救援航线、YOLO 实时检测和触发降落动作。
+- 结论：**第二轮最贴近目标流程的参考项目**。把“检测到人后降落”替换成“分类完成后低速前飞”即可得到同一种任务结构。
+
+### 18. Auterion/PX4 ROS 2 Interface Library
+
+- 项目：[Auterion/px4-ros2-interface-lib](https://github.com/Auterion/px4-ros2-interface-lib)
+- 技术：PX4、ROS 2、C++，部分 Python 绑定
+- 许可证：BSD-3-Clause
+- 与本 Demo 最相关的内容：
+  - `Mode Executor` 是可启动飞行模式并等待完成的状态机；
+  - 示例使用完成回调串联 `Takeoff -> Custom Mode -> RTL -> Wait Disarm`；
+  - 模式失效、节点无响应、人工切换模式时由 PX4 处理控制权和失效保护。
+- 值得借鉴：
+  - 每个状态必须返回明确的成功/失败结果；
+  - 上一状态失败时不得继续向前执行；
+  - 人工遥控或地面站应随时可以夺回控制权；
+  - 状态切换应由完成事件驱动，而不是散落的固定延时。
+- 不照搬：
+  - ROS 2、uXRCE-DDS、C++ 模式注册和 PX4 消息版本匹配；
+  - 第一版不需要动态注册外部飞行模式。
+- 结论：**状态机语义非常值得复用，运行时不引入**。
+
+### 19. MikeS96/autonomous_landing_uav
+
+- 项目：[MikeS96/autonomous_landing_uav](https://github.com/MikeS96/autonomous_landing_uav)
+- 技术：PX4、Gazebo、ROS、MAVROS、OpenCV、Kalman Filter、PID
+- 许可证：MIT
+- 相关包：
+  - `mavros_off_board`：仿真、模型和基础飞行脚本；
+  - `object_detector`：目标检测与跟踪；
+  - `drone_controller`：根据感知结果控制无人机。
+- 值得借鉴：
+  - 感知、飞控适配和任务控制分成独立边界；
+  - 只有第一份有效估计产生后才启动控制器；
+  - 仿真和真实机载电脑使用同一总体工作流。
+- 不照搬：
+  - 着陆板特征匹配、Kalman 跟踪和降落 PID；
+  - ROS/MAVROS 工作区和旧版 Gazebo 配置。
+- 结论：**适合参考包边界和“有效识别后才激活动作”的门控**。
+
+### 20. dji-sdk/Tello-Python
+
+- 项目：[dji-sdk/Tello-Python](https://github.com/dji-sdk/Tello-Python)
+- 技术：Tello SDK、Python 2.7、H.264、姿态识别
+- 许可证：MIT
+- 与本 Demo 最相关的内容：
+  - 官方 `Tello_Video_With_Pose_Recognition` 从视频中抽取单帧；
+  - 把特定姿态识别结果直接绑定到飞行控制命令；
+  - 命令脚本可按顺序执行离散飞行动作。
+- 值得借鉴：
+  - 最小演示不一定需要 ROS、SLAM 或持续跟踪；
+  - 识别结果应先映射成有限的动作意图，再交给飞控；
+  - 离散动作比连续视觉伺服更适合当前低速 Demo。
+- 不照搬：
+  - Tello 协议、Python 2.7、旧 H.264 解码和姿态识别实现。
+- 结论：**是最小交互形式的好例子，但不能作为 PX4/树莓派代码基础**。
+
+### 21. amov-lab/Prometheus
+
+- 项目：[amov-lab/Prometheus](https://github.com/amov-lab/Prometheus)
+- 技术：PX4、ROS、MAVROS、Gazebo、检测、规划、控制
+- 许可证：GitHub 标识 Apache-2.0，但 README 同时写有“仅限个人、不可商用”的附加表述，复用前必须进一步澄清
+- 值得借鉴：
+  - 控制、目标检测、规划和仿真模块分区；
+  - 提供多个可独立运行的功能 Demo；
+  - 中文资料较多，便于理解 PX4 伴随计算机软件的完整边界。
+- 不照搬：
+  - 整套平台、编译脚本、规划和集群功能；
+  - 在许可证表述澄清前不复制源码。
+- 结论：**适合阅读总体模块图，不适合给简单 Demo 增加依赖**。
+
+### 22. CERLAB UAV Autonomy Framework
+
+- 项目：[Zhefan-Xu/CERLAB-UAV-Autonomy](https://github.com/Zhefan-Xu/CERLAB-UAV-Autonomy)
+- 技术：C++、ROS、PX4、MAVROS、Gazebo、检测、规划、控制
+- 许可证：MIT
+- 值得借鉴：
+  - `autonomous_flight`、`onboard_detector`、`tracking_controller` 和 `uav_simulator` 彼此独立；
+  - 同一模块划分覆盖仿真和 PX4 实飞；
+  - 顶层任务包只编排能力，不把检测细节写入飞控适配层。
+- 不照搬：
+  - 地图、轨迹优化、动态避障和多个 git submodule；
+  - ROS Melodic/Noetic 环境。
+- 结论：**模块化参考价值高，但远超第一版范围**。
+
+### 23. Aerostack2
+
+- 项目：[aerostack2/aerostack2](https://github.com/aerostack2/aerostack2)
+- 技术：ROS 2 Humble、C++、Python、行为树、多平台适配
+- 许可证：BSD-3-Clause
+- 值得借鉴：
+  - 飞行平台、行为、行为树、Python API、仿真资源彼此分离；
+  - 强调平台无关和 Sim2Real；
+  - 项目可只安装所需模块。
+- 不照搬：
+  - 多机框架、行为树运行时和完整 ROS 2 基础设施；
+  - 当前六个左右状态用 Python `Enum` 和显式循环已经足够。
+- 结论：**只参考“能力层与任务编排层分离”，不引入框架**。
+
+### 24. GRVC UAV Abstraction Layer
+
+- 项目：[grvcTeam/grvc-ual](https://github.com/grvcTeam/grvc-ual)
+- 技术：ROS、C++/Python、PX4、ArduPilot、DJI、Crazyflie、Gazebo/AirSim
+- 许可证：MIT
+- 值得借鉴：
+  - 统一 UAV 接口下面挂接 MAVROS、MAVLink、DJI、Crazyflie 和仿真后端；
+  - 上层任务不感知具体飞控或仿真器；
+  - 与本 Demo 的 `FlightController` 假后端、MAVSDK 后端思路一致。
+- 不照搬：
+  - 老版本 PX4/ROS 兼容层；
+  - 多飞控后端和配置器。
+- 结论：**强化了保留窄接口和假飞控测试后端的必要性**。
+
 ## 总排序
 
 ```text
@@ -240,12 +370,20 @@ PixEagle
 PX4 ROS 2 camera bridge tutorial
 AIRo FSM
 teNNo test modes
+iq_gnc perception event
+PX4 ROS 2 Mode Executor
+autonomous_landing_uav package boundaries
 
 暂不进入代码路径：
 PX4-ROS2-Gazebo-YOLOv8
 px4-offboard ROS 2
 Clover
 IMX500 model zoo
+Tello-Python
+Prometheus
+CERLAB UAV Autonomy
+Aerostack2
+GRVC UAL
 PX4-Avoidance
 ThermalDrone
 MAVSDK Drone Show
