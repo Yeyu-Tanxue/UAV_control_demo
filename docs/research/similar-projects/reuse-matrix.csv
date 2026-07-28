@@ -1,0 +1,17 @@
+priority,project,url,role,stack,direct_reuse,reuse_method,license,main_risk,decision
+A,MAVSDK-Python,https://github.com/mavlink/MAVSDK-Python,飞行控制,"Python;MAVSDK;PX4",是,"作为依赖并参考官方 Offboard 示例",BSD-3-Clause,"示例缺少完整任务超时和小速度约束",首选
+A,PX4-gazebo-models,https://github.com/PX4/PX4-gazebo-models,仿真相机载体,"Gazebo;SDF;PX4",是,"使用官方带相机 X500 模型",BSD-3-Clause,"模型和 PX4 版本需要匹配",首选
+A,TensorFlow Lite Raspberry Pi classification,https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/raspberry_pi,CNN分类,"Python;TFLite;EfficientNet-Lite0",是,"复用预处理和单帧推理结构",Apache-2.0,"示例相机循环需改成任务触发单帧",首选
+A,Picamera2,https://github.com/raspberrypi/picamera2,树莓派相机,"Python;libcamera",是,"封装 capture_array 相机后端",BSD-2-Clause,"仅适用于受支持的 Raspberry Pi OS 相机栈",首选
+A,PixEagle,https://github.com/alireza787b/PixEagle,架构与安全门,"PX4;MAVSDK;OpenCV;YOLO;FastAPI",局部,"借鉴组件契约和 fail-closed 数据流",Apache-2.0,"系统规模远超 Demo",只复用设计
+A,PX4 ROS 2 Beginner Tutorials,https://github.com/sidharthmohannair/px4-ros2-beginner-tutorials,仿真图像链路,"PX4;Gazebo;ROS2;OpenCV",局部,"参考相机主题和 OpenCV 转换",MIT,"教程仍在建设且引入 ROS2",只作说明书
+B,PX4-ROS2-Gazebo-YOLOv8,https://github.com/monemati/PX4-ROS2-Gazebo-YOLOv8,端到端仿真参考,"PX4;Gazebo;ROS2;MAVSDK;YOLOv8",否,"只借鉴组合方式",未声明,"许可证不明确且依赖过重",禁止复制源码
+B,px4-offboard,https://github.com/Jaeyoung-Lim/px4-offboard,位置设点参考,"Python;ROS2;PX4",否,"补充阅读位置设点和仿真/实机配置",BSD-3-Clause,"ROS2 和 DDS 对 Demo 多余",不作为依赖
+B,Clover,https://github.com/CopterExpress/clover,实机部署参考,"PX4;Raspberry Pi;ROS Noetic;MAVROS;OpenCV",否,"参考硬件分工和部署清单","MIT code; CC BY-NC-SA 4.0 docs","软件栈较旧",不迁移架构
+B,teNNo,https://github.com/williamcorsel/teNNo,识别与动作测试参考,"Python;Tello;OpenCV;YOLO;TensorFlow",局部,"借鉴检测器抽象和确定性测试模式",Apache-2.0,"飞控协议和模型版本不兼容",只复用测试思路
+B,AIRo Control Interface,https://github.com/HKPolyU-UAV/airo_control_interface,有限状态机参考,"PX4;ROS Noetic;MAVROS;MPC;Acados",否,"借鉴悬停状态、超时和安全边界",未确认,"许可证不明确且控制系统过重",只复用设计
+B,Raspberry Pi IMX500 Model Zoo,https://github.com/raspberrypi/imx500-models,未来硬件推理,"IMX500;EfficientNet;MobileNet;YOLO",否,"用于以后选择模型和 AI Camera","模型分别授权","绑定专用硬件且模型许可证不同",未来再评估
+C,PX4-Avoidance,https://github.com/PX4/PX4-Avoidance,避障背景,"PX4;ROS;MAVROS;Depth Camera;Point Cloud",否,"只参考数据流和仿真先行原则",BSD-3-Clause,"远超分类 Demo 范围",排除
+C,ThermalDrone,https://github.com/jacobfeldgoise/ThermalDrone,伴随计算机历史案例,"3DR Solo;DroneKit;Raspberry Pi Zero;Camera",否,"只参考树莓派到飞控的职责划分",未声明,"硬件和软件过旧且无许可证",排除
+C,MAVSDK Drone Show,https://github.com/alireza787b/mavsdk_drone_show,SITL与运行治理,"PX4;MAVSDK;Multi-drone;GCS",否,"只参考 SITL 验证和安全文档","PolyForm/Commercial multi-license","规模和许可证复杂",排除
+C,Ultralytics,https://github.com/ultralytics/ultralytics,目标检测候选,"YOLO;PyTorch;ONNX;NCNN",否,"以后需要目标检测时重新评估","AGPL-3.0/Commercial","当前任务不需要检测且 ARM 版本组合需实测",暂不采用
