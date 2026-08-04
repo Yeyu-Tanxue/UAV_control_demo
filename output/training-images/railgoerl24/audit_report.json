@@ -1,0 +1,57 @@
+{
+  "dataset": "RailGoerl24 Annotated_RGB_data",
+  "camera_height_m": 2.45,
+  "image_count": 12205,
+  "manual_xml_count": 12205,
+  "matched_pair_count": 12205,
+  "sequence_count": 61,
+  "missing_xml_count": 0,
+  "missing_xml": [],
+  "orphan_xml_count": 0,
+  "orphan_xml": [],
+  "parse_error_count": 0,
+  "parse_errors": [],
+  "object_count": 33853,
+  "class_assignment_count": 33853,
+  "frames_with_objects": 10535,
+  "empty_frames": 1670,
+  "label_counts": {
+    "bicycle": 298,
+    "person": 33555
+  },
+  "invalid_box_count": 0,
+  "objects_without_label": 0,
+  "source_data_modified": false,
+  "auto_annotations_used": false,
+  "split_seed": 20260804,
+  "split_target_ratios": {
+    "train": 0.7,
+    "val": 0.15,
+    "test": 0.15
+  },
+  "splits": {
+    "train": {
+      "sequences": 53,
+      "frames": 8423,
+      "frame_ratio": 0.6901269971323228
+    },
+    "val": {
+      "sequences": 4,
+      "frames": 1888,
+      "frame_ratio": 0.15469070053256861
+    },
+    "test": {
+      "sequences": 4,
+      "frames": 1894,
+      "frame_ratio": 0.15518230233510857
+    }
+  },
+  "candidate_frames_per_sequence": 8,
+  "rail_annotation_candidate_count": 488,
+  "output_files": [
+    "dataset_manifest.csv",
+    "rail_annotation_candidates.csv",
+    "audit_report.json",
+    "audit_report.md"
+  ]
+}
