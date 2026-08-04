@@ -1,0 +1,27 @@
+{
+  "batch_id": "railgoerl24_batch_001",
+  "image_count": 200,
+  "split_counts": {
+    "train": 136,
+    "val": 32,
+    "test": 32
+  },
+  "sequence_counts": {
+    "train": 53,
+    "val": 4,
+    "test": 4
+  },
+  "selection_reason_counts": {
+    "sequence_coverage": 106,
+    "hard_case_extension": 30,
+    "holdout_ground_truth": 64
+  },
+  "scenario_counts": {
+    "normal": 185,
+    "object_on_track": 12,
+    "switch_review": 3
+  },
+  "materialized": true,
+  "materialized_bytes": 72810759,
+  "source_data_modified": false
+}

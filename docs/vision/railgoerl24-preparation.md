@@ -24,6 +24,24 @@ $python = "C:\Users\顾朱政霖\.cache\codex-runtimes\codex-primary-runtime\dep
 
 所有路径相对于 `Annotated_RGB_data`，因此清单不绑定某台电脑。工具只使用人工 XML，明确排除 `_auto_annots`。
 
+## 首批200张标注集
+
+首批固定为136张 train、32张 val 和32张 test。运行：
+
+```powershell
+$python = "C:\Users\顾朱政霖\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+& $python tools\select_rail_annotation_batch.py `
+  --dataset-root "E:\冰雪天气轨道图像采集\图像数据\Annotated_RGB_data" `
+  --materialize
+```
+
+输出位于 `output/training-images/railgoerl24/batch_001_200/`。其中：
+
+- `annotation_batch.csv` 保存批次文件、原始图片、视频序列和用途的完整映射；
+- `images/` 是供本地标注工具使用的图片副本，不提交到 Git；
+- train 覆盖全部53个训练序列，每段至少2张，另外30个不同序列各增加1张困难样本；
+- val/test 标记为 `manual_ground_truth`，禁止用模型生成的伪标签直接替代人工真值。
+
 ## 为什么必须按视频划分
 
 同一视频的相邻帧几乎相同。如果逐帧随机划分，训练集中的前后帧会出现在验证集或测试集，指标会虚高。工具把完整 `sequence_id` 分配到同一个 split，目标帧比例为 70% / 15% / 15%。
