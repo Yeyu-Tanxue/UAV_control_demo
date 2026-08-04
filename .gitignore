@@ -1,0 +1,4 @@
+# Training images are large and should stay outside normal Git history.
+/data/training-images/raw/
+/data/training-images/generated/
+/data/training-images/processed/

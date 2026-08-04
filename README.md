@@ -19,6 +19,11 @@
 - `PROJECT_NOTES.md`：逐个项目的复用点、限制和许可证说明；
 - `reuse-matrix.csv`：可排序、可继续补充的项目复用矩阵。
 
+0.92 m 与 2.5 m 铁轨视觉训练图像的来源、许可和高度核验记录放在
+[`data/training-images/`](data/training-images/README.md)。其中 2.5 m 档已有距轨面
+2.45 m 的真实公开数据候选；0.92 m 档暂未找到可核验高度的真实公开集，先采用可配置
+Blender 铁路场景生成精确高度样本，后续再进行受控实拍。
+
 X500 Demo 的采购清单和二手价格核验见
 [`output/采购套件价格核验表.csv`](output/采购套件价格核验表.csv)。表格沿用原
 `UAV_control` 项目的六列采购核验格式。更细的价格依据和逐项新旧区间保存在
