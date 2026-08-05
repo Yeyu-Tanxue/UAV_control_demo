@@ -43,6 +43,9 @@ Create RailGoerl24 drafts without treating missed detections as background:
 `draft_labels/` contains confidence-free YOLO segmentation labels that can be
 corrected or imported into an annotation tool. `review_images/` contains visual
 overlays. `review_manifest.csv` puts missed and low-confidence images first.
+It also records whether the mask reaches the near field and contains the lower
+image center. This is a coarse safety/review heuristic for an ego-track camera,
+not a substitute for manual confirmation or camera calibration.
 No empty label is written for a miss, because every selected image is expected
 to contain a current track and a miss must not become a negative training sample.
 
@@ -73,3 +76,23 @@ occlusion, and strong viewpoint changes are common failure cases. More L4R-only
 epochs are unlikely to close this domain gap. The next useful step is to correct
 all 200 drafts/misses, fine-tune on the RailGoerl24 train split, use validation
 for iteration, and keep the 32-image test split untouched until final evaluation.
+
+## Fall comparison
+
+The L4R_NLB fall set produced 1,634 usable samples. With the same model,
+resolution, batch size, seed, confidence threshold, and one-epoch schedule, its
+model produced 148 RailGoerl24 drafts versus 103 for winter. Visual review showed
+that many extra fall detections selected a neighboring line at a turnout.
+
+Using the coarse requirement that a mask reaches normalized `y >= 0.85` and
+contains normalized `x = 0.5` in that near-field slice:
+
+| Model | Raw drafts | Geometry-pass candidates |
+| --- | ---: | ---: |
+| winter | 103 | 99 |
+| fall | 148 | 56 |
+| union of both models | — | 120 |
+
+Therefore fall improves raw recall but is not a safe replacement for winter.
+The useful next baseline is multi-season training followed by correction and
+fine-tuning on RailGoerl24 itself.

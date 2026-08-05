@@ -224,7 +224,7 @@ def audit_source(
     annotation_only = sorted(set(annotations) - set(images), key=frame_number)
     mask_only = sorted(set(masks) - set(annotations), key=frame_number)
     report: dict[str, object] = {
-        "dataset": "L4R_NLB_winter",
+        "dataset": source_root.name,
         "image_count": len(images),
         "annotation_count": len(annotations),
         "mask_count": len(masks),
@@ -315,7 +315,7 @@ def _write_csv(path: Path, rows: Iterable[dict[str, object]]) -> None:
 def _write_report(path: Path, report: dict[str, object]) -> None:
     splits = report["splits"]
     lines = [
-        "# L4R_NLB winter → YOLO分割转换报告",
+        f"# {report['dataset']} → YOLO segmentation conversion report",
         "",
         "- 类别：`ego_track_area`；",
         "- 标签来源：JSON中 `relative position = ego` 的左右钢轨点；",
@@ -372,6 +372,7 @@ def prepare(
     rows, report = audit_source(source_root)
     assignments = assign_temporal_block_splits(rows, block_size, seed)
     output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / ".gitignore").write_text("/images/\n/labels/\n", encoding="utf-8")
     split_blocks: dict[str, set[int]] = defaultdict(set)
     split_counts: Counter[str] = Counter()
     expected_stems: dict[str, set[str]] = defaultdict(set)
@@ -441,7 +442,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--source-root",
         type=Path,
         required=True,
-        help="Inner L4R_NLB_winter directory containing images/annotations/masks",
+        help="Inner L4R_NLB season directory containing images/annotations/masks",
     )
     parser.add_argument(
         "--output-dir",

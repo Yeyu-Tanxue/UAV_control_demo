@@ -1,0 +1,78 @@
+{
+  "dataset": "L4R_NLB_fall",
+  "image_count": 1701,
+  "annotation_count": 1699,
+  "mask_count": 1701,
+  "usable_count": 1634,
+  "excluded_count": 65,
+  "exclusion_reasons": {
+    "ego_track_count_0": 50,
+    "self_intersecting_polygon": 15
+  },
+  "image_without_annotation_count": 2,
+  "image_without_annotation": [
+    "nlb_fall_000001",
+    "nlb_fall_000038"
+  ],
+  "annotation_without_image_count": 0,
+  "mask_without_annotation_count": 2,
+  "total_track_count": 2790,
+  "track_position_counts": {
+    "ego": 1649,
+    "left": 592,
+    "right": 549
+  },
+  "switch_count": 529,
+  "tag_counts": {
+    "light:auto_bright_dark": 1699,
+    "light:natural": 1642,
+    "weather:cloudy": 1599,
+    "environment:rural": 1542,
+    "light:uniform": 1517,
+    "time_of_day:day": 1365,
+    "track_layout:curve": 1279,
+    "track_layout:straight": 688,
+    "environment:urban": 348,
+    "light:dark": 296,
+    "time_of_day:twilight": 273,
+    "environment:station": 191,
+    "weather:rainy": 144,
+    "track_layout:orthogonal structures": 124,
+    "additional_attributes:obstruction": 90,
+    "environment:underground": 76,
+    "weather:unknown": 67,
+    "track_layout:parallel structures": 63,
+    "light:hard shadows": 63,
+    "time_of_day:unknown": 61,
+    "light:artificial": 36,
+    "weather:sunny": 32,
+    "track_layout:unknown": 20,
+    "light:unknown": 4
+  },
+  "source_masks_used_as_labels": false,
+  "label_definition": "ego_track_area from ego left/right rail points",
+  "source_data_modified": false,
+  "split_seed": 20260805,
+  "temporal_block_size": 250,
+  "split_target_ratios": {
+    "train": 0.8,
+    "val": 0.1,
+    "test": 0.1
+  },
+  "splits": {
+    "train": {
+      "images": 1210,
+      "blocks": 27
+    },
+    "val": {
+      "images": 213,
+      "blocks": 1
+    },
+    "test": {
+      "images": 211,
+      "blocks": 1
+    }
+  },
+  "materialization_mode": "hardlink",
+  "stale_generated_files_removed": 0
+}

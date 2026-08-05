@@ -126,15 +126,26 @@ def preannotate(args: argparse.Namespace) -> None:
 
             detected = result.masks is not None and result.boxes is not None and len(result.boxes) > 0
             confidence = float(result.boxes.conf[0].item()) if detected else None
+            reaches_near_field = False
+            near_field_contains_center = False
             if detected:
                 class_id = int(result.boxes.cls[0].item())
                 polygon = result.masks.xyn[0]
                 _write_segmentation_label(label_path, class_id, polygon)
+                near_x = [float(x) for x, y in polygon if float(y) >= args.near_field_y]
+                reaches_near_field = bool(near_x)
+                near_field_contains_center = reaches_near_field and (
+                    min(near_x) <= args.expected_center_x <= max(near_x)
+                )
 
             if not detected:
                 priority = "high"
                 status = "no_detection"
-            elif confidence is not None and confidence < args.review_conf:
+            elif (
+                confidence is not None
+                and confidence < args.review_conf
+                or not near_field_contains_center
+            ):
                 priority = "high"
                 status = "draft"
             else:
@@ -147,6 +158,8 @@ def preannotate(args: argparse.Namespace) -> None:
                     "image": image_path.relative_to(source).as_posix(),
                     "status": status,
                     "confidence": "" if confidence is None else f"{confidence:.6f}",
+                    "reaches_near_field": reaches_near_field,
+                    "near_field_contains_center": near_field_contains_center,
                     "review_priority": priority,
                     "draft_label": (
                         label_path.relative_to(output).as_posix() if detected else ""
@@ -163,8 +176,10 @@ def preannotate(args: argparse.Namespace) -> None:
         writer.writerows(rows)
 
     detected_count = sum(row["status"] == "draft" for row in rows)
+    geometry_count = sum(row["near_field_contains_center"] is True for row in rows)
     print(f"Images: {len(rows)}")
     print(f"Draft labels: {detected_count}")
+    print(f"Near-field center candidates: {geometry_count}")
     print(f"No detection: {len(rows) - detected_count}")
     print(f"Review manifest: {manifest}")
 
@@ -213,6 +228,8 @@ def build_parser() -> argparse.ArgumentParser:
     pre_parser.add_argument("--imgsz", type=int, default=640)
     pre_parser.add_argument("--conf", type=float, default=0.15)
     pre_parser.add_argument("--review-conf", type=float, default=0.50)
+    pre_parser.add_argument("--near-field-y", type=float, default=0.85)
+    pre_parser.add_argument("--expected-center-x", type=float, default=0.50)
     pre_parser.add_argument("--device", default="0")
     pre_parser.add_argument("--verbose", action="store_true")
     pre_parser.set_defaults(func=preannotate)
