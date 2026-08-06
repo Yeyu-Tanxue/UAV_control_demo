@@ -77,7 +77,7 @@ epochs are unlikely to close this domain gap. The next useful step is to correct
 all 200 drafts/misses, fine-tune on the RailGoerl24 train split, use validation
 for iteration, and keep the 32-image test split untouched until final evaluation.
 
-## Fall comparison
+## Seasonal comparison
 
 The L4R_NLB fall set produced 1,634 usable samples. With the same model,
 resolution, batch size, seed, confidence threshold, and one-epoch schedule, its
@@ -91,8 +91,17 @@ contains normalized `x = 0.5` in that near-field slice:
 | --- | ---: | ---: |
 | winter | 103 | 99 |
 | fall | 148 | 56 |
-| union of both models | — | 120 |
+| spring | 198 | 160 |
+| union of all three models | — | 168 |
 
-Therefore fall improves raw recall but is not a safe replacement for winter.
-The useful next baseline is multi-season training followed by correction and
-fine-tuning on RailGoerl24 itself.
+The spring set produced 2,792 usable samples. Its one-epoch temporal test metrics
+were mask mAP50 0.976 and mask mAP50-95 0.964. On RailGoerl24, 186 of its 198
+drafts had confidence at least 0.5, with mean confidence 0.904. Visual review
+confirmed much better masks on clear current tracks, while some turnouts still
+selected a neighboring line with high confidence.
+
+Therefore spring is the strongest single-season source for RailGoerl24 drafts,
+but confidence alone is not a safe acceptance rule. Fall improves raw recall over
+winter but contributes no geometry-pass candidate beyond the spring+winter
+union. The useful next baseline is spring+winter training followed by correction
+and fine-tuning on RailGoerl24 itself.
