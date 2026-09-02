@@ -1,0 +1,10 @@
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: fork_left
+  1: fork_right
+  2: fork_unknown
+  3: merge_left
+  4: merge_right
+  5: merge_unknown

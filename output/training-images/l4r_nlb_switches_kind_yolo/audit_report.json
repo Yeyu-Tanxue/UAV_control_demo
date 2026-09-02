@@ -1,0 +1,85 @@
+{
+  "label_definition": "L4R_NLB switch bounding boxes",
+  "class_mode": "kind",
+  "sources": {
+    "fall": "E:\\冰雪天气轨道图像采集\\图像数据\\L4R_NLB_fall\\L4R_NLB_fall",
+    "spring": "E:\\冰雪天气轨道图像采集\\图像数据\\L4R_NLB_spring\\L4R_NLB_spring",
+    "winter": "E:\\冰雪天气轨道图像采集\\图像数据\\L4R_NLB_winter\\L4R_NLB_winter"
+  },
+  "image_size": [
+    1920,
+    1080
+  ],
+  "class_names": [
+    "fork",
+    "merge"
+  ],
+  "class_counts": {
+    "merge": 673,
+    "fork": 462
+  },
+  "source_detailed_class_counts": {
+    "merge_left": 157,
+    "merge_unknown": 337,
+    "fork_unknown": 209,
+    "merge_right": 179,
+    "fork_left": 122,
+    "fork_right": 131
+  },
+  "raw_switches": 1143,
+  "total_switches": 1135,
+  "invalid_switch_counts": {
+    "duplicate_box": 3,
+    "invalid_marks": 4,
+    "degenerate_box": 1
+  },
+  "collapsed_duplicate_boxes": 0,
+  "usable_images_by_season": {
+    "fall": 1699,
+    "spring": 2916,
+    "winter": 2441
+  },
+  "usable_images": 7056,
+  "positive_images": 772,
+  "negative_images": 6284,
+  "box_size_px": {
+    "width_p10": 26.0,
+    "width_median": 67.0,
+    "height_p10": 12.0,
+    "height_median": 39.0
+  },
+  "split_seed": 20260805,
+  "temporal_block_size": 250,
+  "splits": {
+    "train": {
+      "images": 5643,
+      "positive_images": 580,
+      "class_counts": {
+        "merge": 486,
+        "fork": 341
+      },
+      "blocks": 60
+    },
+    "val": {
+      "images": 719,
+      "positive_images": 107,
+      "class_counts": {
+        "fork": 57,
+        "merge": 105
+      },
+      "blocks": 7
+    },
+    "test": {
+      "images": 694,
+      "positive_images": 85,
+      "class_counts": {
+        "merge": 82,
+        "fork": 64
+      },
+      "blocks": 7
+    }
+  },
+  "materialization_mode": "hardlink",
+  "stale_generated_files_removed": 0,
+  "source_data_modified": false
+}

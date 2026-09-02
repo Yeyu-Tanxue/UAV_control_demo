@@ -1,0 +1,95 @@
+{
+  "label_definition": "L4R_NLB switches kind/direction bounding boxes",
+  "sources": {
+    "fall": "E:\\冰雪天气轨道图像采集\\图像数据\\L4R_NLB_fall\\L4R_NLB_fall",
+    "spring": "E:\\冰雪天气轨道图像采集\\图像数据\\L4R_NLB_spring\\L4R_NLB_spring",
+    "winter": "E:\\冰雪天气轨道图像采集\\图像数据\\L4R_NLB_winter\\L4R_NLB_winter"
+  },
+  "image_size": [
+    1920,
+    1080
+  ],
+  "class_names": [
+    "fork_left",
+    "fork_right",
+    "fork_unknown",
+    "merge_left",
+    "merge_right",
+    "merge_unknown"
+  ],
+  "class_counts": {
+    "merge_left": 157,
+    "merge_unknown": 337,
+    "fork_unknown": 209,
+    "merge_right": 179,
+    "fork_left": 122,
+    "fork_right": 131
+  },
+  "raw_switches": 1143,
+  "total_switches": 1135,
+  "invalid_switch_counts": {
+    "duplicate_box": 3,
+    "invalid_marks": 4,
+    "degenerate_box": 1
+  },
+  "usable_images_by_season": {
+    "fall": 1699,
+    "spring": 2916,
+    "winter": 2441
+  },
+  "usable_images": 7056,
+  "positive_images": 772,
+  "negative_images": 6284,
+  "box_size_px": {
+    "width_p10": 26.0,
+    "width_median": 67.0,
+    "height_p10": 12.0,
+    "height_median": 39.0
+  },
+  "split_seed": 20260805,
+  "temporal_block_size": 250,
+  "splits": {
+    "train": {
+      "images": 5643,
+      "positive_images": 580,
+      "class_counts": {
+        "merge_left": 125,
+        "merge_unknown": 237,
+        "fork_unknown": 146,
+        "merge_right": 124,
+        "fork_left": 94,
+        "fork_right": 101
+      },
+      "blocks": 60
+    },
+    "val": {
+      "images": 719,
+      "positive_images": 107,
+      "class_counts": {
+        "fork_left": 12,
+        "fork_unknown": 30,
+        "merge_unknown": 54,
+        "merge_left": 17,
+        "fork_right": 15,
+        "merge_right": 34
+      },
+      "blocks": 7
+    },
+    "test": {
+      "images": 694,
+      "positive_images": 85,
+      "class_counts": {
+        "merge_unknown": 46,
+        "merge_right": 21,
+        "fork_unknown": 33,
+        "fork_left": 16,
+        "fork_right": 15,
+        "merge_left": 15
+      },
+      "blocks": 7
+    }
+  },
+  "materialization_mode": "hardlink",
+  "stale_generated_files_removed": 3638,
+  "source_data_modified": false
+}
