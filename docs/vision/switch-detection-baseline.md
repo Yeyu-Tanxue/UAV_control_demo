@@ -82,7 +82,34 @@ python tools/switch_detection.py preannotate `
 检查清单位于
 `output/preannotations/railgoerl24_switches_single_l4r_v0/review_manifest.csv`。
 
-## 4. Demo 控制状态建议
+## 4. 首批 Labelme 人工复核
+
+首批工作区包含 80 张图片：完整 `Weichenstellung` 序列均匀抽取 30 张、不同序列的
+高置信疑似误报 30 张，以及模型未检出的普通轨道 20 张。生成或恢复工作区：
+
+```powershell
+python tools/prepare_labelme_switch_review.py prepare
+```
+
+工作区位于
+`output/manual-annotations/railgoerl24_switch_labelme_batch_001/images`。在 Labelme 中：
+
+1. 正确的模型框直接保留，位置不准则调整矩形；
+2. 普通轨道误报应删除所有框；
+3. 漏检时为每个可见道岔绘制 `switch` 矩形；
+4. 检查整张图后勾选 `reviewed`，过远或无法判断时同时勾选 `uncertain`；
+5. 按 Ctrl+S 保存，不重命名图片或 JSON。
+
+检查进度及格式：
+
+```powershell
+python tools/prepare_labelme_switch_review.py status
+```
+
+脚本默认保留已经存在的 JSON；只有明确需要重新生成全部草稿时才使用
+`prepare --overwrite`。
+
+## 5. Demo 控制状态建议
 
 1. `TRACK_FOLLOW`：由轨道区域中心线计算横向偏差和飞行角度，低速前进；
 2. 连续至少 3 帧检测到 `switch`，并且轨道分割也出现两个稳定候选中心线时，进入
