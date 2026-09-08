@@ -2,3 +2,19 @@
 /data/training-images/raw/
 /data/training-images/generated/
 /data/training-images/processed/
+
+# Local Python and test artifacts.
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+
+# PX4/Gazebo runtime artifacts must stay outside this repository.
+logs/
+*.ulg
+# Downloaded model weights and local review material.
+*.pt
+/tmp/
+.venv*/

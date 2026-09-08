@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uav-control-demo"
+version = "0.1.0"
+description = "Minimal PX4 hover-recognize-forward simulation demo"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+sim = ["mavsdk==3.15.3"]
+
+[project.scripts]
+uav-demo = "uav_demo.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

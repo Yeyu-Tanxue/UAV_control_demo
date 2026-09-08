@@ -1,33 +1,82 @@
 # UAV Control Demo
 
-本仓库用于实现一个尽量简单、可解释、可逐步验证的无人机演示：
+这是轨道图像采集项目中的独立演示工程，用来验证一个尽量小、容易排查的任务闭环：
 
-1. 起飞并悬停；
-2. 获取一帧图像；
-3. 用轻量 CNN 完成一次分类；
-4. 低速向前飞行一小段；
-5. 再次悬停并重复识别；
-6. 完成若干轮后降落。
+1. X500 起飞并悬停；
+2. 执行一次识别；
+3. 低速向前飞行一小段；
+4. 再次悬停，重复若干轮后降落。
 
-当前阶段只开展方案调研和最小架构设计，暂不实现完整飞行功能。
+目前识别结果仍由模拟器产生。Gazebo 相机和真实模型尚未接入任务状态机，因此本仓库当前用于验证飞行流程、接口拆分和异常处理，不代表视觉闭环已经完成。
 
-## 调研资料
+## 当前内容
 
-相似项目的筛选结果放在 [`docs/research/similar-projects/`](docs/research/similar-projects/README.md)：
+- `src/uav_demo/mission.py`：与具体飞控解耦的任务状态机；
+- `src/uav_demo/backends/`：dry-run 后端和 MAVSDK/PX4 SITL 后端；
+- `simulation/gazebo/`：程序化生成的 30 m 标准轨距简化轨道场景；
+- `tools/`：轨道数据审计、YOLO 格式转换、预标注和训练入口；
+- `docs/vision/`：轨道区域分割、道岔检测和人工复核记录；
+- `tests/`：状态机、数据转换和仿真场景测试。
 
-- `README.md`：调研结论、优先复用清单和建议架构；
-- `PROJECT_NOTES.md`：逐个项目的复用点、限制和许可证说明；
-- `reuse-matrix.csv`：可排序、可继续补充的项目复用矩阵。
+## 快速检查
 
-0.92 m 与 2.5 m 铁轨视觉训练图像的来源、许可和高度核验记录放在
-[`data/training-images/`](data/training-images/README.md)。其中 2.5 m 档已有距轨面
-2.45 m 的真实公开数据候选；0.92 m 档暂未找到可核验高度的真实公开集，先采用可配置
-Blender 铁路场景生成精确高度样本，后续再进行受控实拍。
+环境要求为 Ubuntu 22.04、PX4 v1.17.0、Gazebo Harmonic、Python 3.10 和 MAVSDK-Python 3.15.3。
 
-X500 Demo 的采购清单和二手价格核验见
-[`output/采购套件价格核验表.csv`](output/采购套件价格核验表.csv)。表格沿用原
-`UAV_control` 项目的六列采购核验格式。更细的价格依据和逐项新旧区间保存在
-[`docs/research/hardware/x500-demo-cost.csv`](docs/research/hardware/x500-demo-cost.csv)。
-两张表均以 2026-07-29 可查的厂商价格为锚点，二手价格是采购预算估算，不是实时成交报价。
+不连接飞控时运行：
 
-本仓库不直接收录第三方项目源码。后续确需复制或修改代码时，必须先核对项目许可证、具体文件版权声明和版本，再保留相应归属信息。
+```bash
+./scripts/setup_python.sh
+./scripts/run_dry_demo.sh
+```
+
+启动普通 X500 SITL：
+
+```bash
+./scripts/start_px4_sitl.sh
+```
+
+启动程序化轨道场景：
+
+```bash
+./scripts/start_rail_sitl.sh
+```
+
+在另一个终端运行任务：
+
+```bash
+./scripts/run_sitl_demo.sh
+```
+
+默认任务起飞至 2 m，完成两轮“悬停、模拟识别、0.2 m/s 前飞 0.5 m、停稳”，然后退出 Offboard 并降落。SITL 后端必须显式传入 `--confirm-sitl`。
+
+详细启动和异常处理见 [`docs/simulation/README.md`](docs/simulation/README.md)。
+
+## 已有数据与视觉工作
+
+- RailGoerl24：审计 12,205 帧、61 段视频和 33,853 个目标实例，并按完整视频划分数据集；
+- L4R_NLB：整理春、秋、冬三季轨道区域分割样本和多季节道岔检测样本；
+- 轨道分割：完成单季节 YOLO 分割基线和 RailGoerl24 跨域预标注；
+- 道岔检测：将方向相关的 `fork/merge` 合并为单一 `switch` 类，模型目前只用于人工筛选和预标注。
+
+具体数据口径、训练配置和限制见 [`docs/vision/`](docs/vision/)。训练图像、模型权重、运行日志和训练输出不进入普通 Git 历史。
+
+## 测试
+
+在仓库根目录运行：
+
+```bash
+PYTHONPATH="$PWD:$PWD/src" python -m unittest discover -s tests -v
+```
+
+当前轻量工程测试共 18 项，覆盖任务状态迁移、识别拒绝和取消后的安全降落、数据转换、序列级划分以及程序化轨道世界生成。
+
+## 安全边界
+
+- 当前代码只用于 PX4/Gazebo 软件在环仿真；
+- 识别失败、运行异常或取消时，任务请求零速度、退出 Offboard 并降落；
+- 未确认触地时不会因超时而强制解锁；
+- 真实飞行必须在封闭、停用、断电、无人员侵入且取得许可的场地进行，并保留 QGroundControl 监控和遥控人工接管。
+
+## 数据和模型许可
+
+仓库不直接提交训练数据、模型权重或第三方项目源码。数据来源、使用许可和高度核验记录位于 [`data/training-images/`](data/training-images/README.md)；引用第三方模型或数据时需保留原始署名和许可证。

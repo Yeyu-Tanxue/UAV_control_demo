@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.9">
+  <world name="rail_demo">
+    <physics type="ode">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type="adiabatic"/>
+
+    <scene>
+      <grid>false</grid>
+      <ambient>0.45 0.45 0.42 1</ambient>
+      <background>0.70 0.78 0.86 1</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>1 1</size></plane></geometry>
+          <surface><friction><ode/></friction><bounce/><contact/></surface>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>200 100</size></plane></geometry>
+          <material>
+            <ambient>0.20 0.28 0.16 1</ambient>
+            <diffuse>0.30 0.40 0.23 1</diffuse>
+            <specular>0.02 0.02 0.02 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <include>
+      <uri>model://rail_track</uri>
+      <name>main_track</name>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <!-- A flat pad keeps the X500 away from rail collisions at startup. -->
+    <model name="launch_pad">
+      <static>true</static>
+      <pose>-13 -3 0.06 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>3 3 0.12</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>3 3 0.12</size></box></geometry>
+          <material>
+            <ambient>0.28 0.28 0.28 1</ambient>
+            <diffuse>0.38 0.38 0.38 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <light name="sunUTC" type="directional">
+      <pose>0 0 500 0 0 0</pose>
+      <cast_shadows>true</cast_shadows>
+      <intensity>1</intensity>
+      <direction>-0.25 0.45 -0.86</direction>
+      <diffuse>0.92 0.90 0.84 1</diffuse>
+      <specular>0.25 0.25 0.25 1</specular>
+      <attenuation>
+        <range>2000</range><linear>0</linear><constant>1</constant><quadratic>0</quadratic>
+      </attenuation>
+    </light>
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>47.397971057728974</latitude_deg>
+      <longitude_deg>8.546163739800146</longitude_deg>
+      <elevation>0</elevation>
+    </spherical_coordinates>
+  </world>
+</sdf>
