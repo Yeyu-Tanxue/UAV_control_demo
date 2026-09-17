@@ -9,6 +9,6 @@ python3 -m venv "${venv_dir}"
 "${venv_dir}/bin/python" -m pip install \
     --disable-pip-version-check \
     --progress-bar off \
-    -e "${repo_dir}[sim]"
+    -e "${repo_dir}[sim,vision]"
 
 echo "Python environment ready: ${venv_dir}"

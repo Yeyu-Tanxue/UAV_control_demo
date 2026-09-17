@@ -10,6 +10,10 @@ class RecognitionResult:
     accepted: bool
     label: str
     confidence: float
+    lateral_error_norm: float = 0.0
+    heading_error_deg: float = 0.0
+    valid_rows: int = 0
+    source_id: str = ""
 
 
 class Recognizer(Protocol):
@@ -26,6 +30,13 @@ class FlightController(Protocol):
     async def hold(self) -> None: ...
 
     async def move_forward(self, speed_m_s: float) -> None: ...
+
+    async def set_body_velocity(
+        self,
+        forward_m_s: float,
+        right_m_s: float,
+        yaw_rate_deg_s: float,
+    ) -> None: ...
 
     async def stop_offboard(self) -> None: ...
 

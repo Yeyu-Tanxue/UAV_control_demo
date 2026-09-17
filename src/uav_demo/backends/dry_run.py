@@ -29,6 +29,19 @@ class DryRunController:
     async def move_forward(self, speed_m_s: float) -> None:
         self._record(f"body_velocity(forward={speed_m_s:.2f}m/s)")
 
+    async def set_body_velocity(
+        self,
+        forward_m_s: float,
+        right_m_s: float,
+        yaw_rate_deg_s: float,
+    ) -> None:
+        self._record(
+            "body_velocity("
+            f"forward={forward_m_s:.2f}m/s, "
+            f"right={right_m_s:.2f}m/s, "
+            f"yaw_rate={yaw_rate_deg_s:.2f}deg/s)"
+        )
+
     async def stop_offboard(self) -> None:
         self._record("stop_offboard")
 

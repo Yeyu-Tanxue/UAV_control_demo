@@ -17,4 +17,11 @@ logs/
 # Downloaded model weights and local review material.
 *.pt
 /tmp/
+/captures/
+/output/gazebo-vision/
+/output/pdf/*.aux
+/output/pdf/*.log
+/output/pdf/*.out
+/output/pdf/*.toc
+/output/pdf/*.zip
 .venv*/

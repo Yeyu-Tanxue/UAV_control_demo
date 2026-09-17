@@ -84,8 +84,18 @@ class MavsdkPx4Controller:
             f"relative altitude >= {minimum_altitude:.2f} m",
         )
 
-    def _velocity(self, forward_m_s: float) -> Any:
-        return self._VelocityBodyYawspeed(forward_m_s, 0.0, 0.0, 0.0)
+    def _velocity(
+        self,
+        forward_m_s: float,
+        right_m_s: float = 0.0,
+        yaw_rate_deg_s: float = 0.0,
+    ) -> Any:
+        return self._VelocityBodyYawspeed(
+            forward_m_s,
+            right_m_s,
+            0.0,
+            yaw_rate_deg_s,
+        )
 
     async def start_offboard_hold(self) -> None:
         await self._drone.offboard.set_velocity_body(self._velocity(0.0))
@@ -102,6 +112,22 @@ class MavsdkPx4Controller:
     async def move_forward(self, speed_m_s: float) -> None:
         self._logger.info("Commanding %.2f m/s forward in body frame", speed_m_s)
         await self._drone.offboard.set_velocity_body(self._velocity(speed_m_s))
+
+    async def set_body_velocity(
+        self,
+        forward_m_s: float,
+        right_m_s: float,
+        yaw_rate_deg_s: float,
+    ) -> None:
+        self._logger.info(
+            "Vision command: forward=%.2f m/s, right=%.2f m/s, yaw=%.2f deg/s",
+            forward_m_s,
+            right_m_s,
+            yaw_rate_deg_s,
+        )
+        await self._drone.offboard.set_velocity_body(
+            self._velocity(forward_m_s, right_m_s, yaw_rate_deg_s)
+        )
 
     async def stop_offboard(self) -> None:
         if not self._offboard_started:

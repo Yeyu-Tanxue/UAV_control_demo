@@ -10,6 +10,7 @@ class MissionState(Enum):
     IDLE = auto()
     CONNECTING = auto()
     TAKING_OFF = auto()
+    POSITIONING = auto()
     HOVERING = auto()
     RECOGNIZING = auto()
     MOVING_FORWARD = auto()
@@ -55,6 +56,14 @@ class MissionRunner:
                 self._config.takeoff_timeout_s,
             )
             await self._controller.start_offboard_hold()
+
+            if self._config.approach_distance_m > 0:
+                self._transition(MissionState.POSITIONING)
+                await self._controller.move_forward(self._config.forward_speed_m_s)
+                await self._sleep(self._config.approach_duration_s)
+                self._transition(MissionState.SETTLING)
+                await self._controller.hold()
+                await self._sleep(self._config.settle_time_s)
 
             for cycle in range(1, self._config.cycles + 1):
                 self._transition(MissionState.HOVERING)

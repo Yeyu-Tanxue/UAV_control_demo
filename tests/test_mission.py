@@ -81,6 +81,7 @@ class MissionRunnerTests(unittest.IsolatedAsyncioTestCase):
             cycles=2,
             recognition_delay_s=0.0,
             forward_speed_m_s=0.2,
+            approach_distance_m=0.0,
             forward_distance_m=0.5,
             settle_time_s=1.0,
         )
@@ -114,7 +115,7 @@ class MissionRunnerTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_rejected_recognition_triggers_safety_landing(self) -> None:
         controller = FakeController()
-        config = MissionConfig(cycles=1, recognition_delay_s=0.0)
+        config = MissionConfig(cycles=1, recognition_delay_s=0.0, approach_distance_m=0.0)
         runner = MissionRunner(controller, RejectRecognizer(), config)
 
         with self.assertRaises(RecognitionRejected):
@@ -130,7 +131,7 @@ class MissionRunnerTests(unittest.IsolatedAsyncioTestCase):
         runner = MissionRunner(
             controller,
             recognizer,
-            MissionConfig(cycles=1, recognition_delay_s=0.0),
+            MissionConfig(cycles=1, recognition_delay_s=0.0, approach_distance_m=0.0),
         )
 
         task = asyncio.create_task(runner.run())

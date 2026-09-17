@@ -1,17 +1,31 @@
 # UAV Control Demo
 
-这是轨道图像采集项目中的独立演示工程，用来验证一个尽量小、容易排查的任务闭环：
+这是轨道图像采集项目中的独立演示工程，用来验证一个尽量小、容易排查的视觉
+控制闭环：
 
 1. X500 起飞并悬停；
-2. 执行一次识别；
-3. 低速向前飞行一小段；
+2. 在伴随计算机本地执行轨道分割并计算中心与航向；
+3. 根据视觉误差低速前进、横移和修正偏航；
 4. 再次悬停，重复若干轮后降落。
 
-目前识别结果仍由模拟器产生。Gazebo 相机和真实模型尚未接入任务状态机，因此本仓库当前用于验证飞行流程、接口拆分和异常处理，不代表视觉闭环已经完成。
+Spring YOLO 分割模型已经接入独立视觉状态机。活动 SITL 脚本不再使用固定
+直线飞行；Gazebo 相机、YOLO 推理、几何计算和控制映射在同一任务进程完成。
+真实树莓派入口使用 Picamera2，本地模型输出通过 MAVSDK 发送给 PX4。
+
+最新的米制视觉闭环实验入口进一步加入相机内参、机体姿态、距轨面高度和动态
+单应投影。在直轨 SITL 中，约 \(\pm0.4\) m、\(\pm10^\circ\) 的正反向初始误差
+均完成收敛、三次低速前进脉冲和确认降落。结果见
+[`docs/validation/metric-closed-loop-boundary-20260916.md`](docs/validation/metric-closed-loop-boundary-20260916.md)。
 
 ## 当前内容
 
 - `src/uav_demo/mission.py`：与具体飞控解耦的任务状态机；
+- `src/uav_demo/visual_mission.py`：不调用固定直线指令的视觉闭环状态机；
+- `src/uav_demo/onboard_vision.py`：Gazebo/树莓派相机和本地 YOLO 推理；
+- `src/uav_demo/vision_control.py`：掩膜中心线、航向与速度映射；
+- `src/uav_demo/ground_projection.py`：姿态和高度驱动的动态轨面投影；
+- `src/uav_demo/metric_rail_geometry.py`：鸟瞰图中的米制轨道中心与航向拟合；
+- `src/uav_demo/metric_control.py`：米制误差到有界机体系速度的映射；
 - `src/uav_demo/backends/`：dry-run 后端和 MAVSDK/PX4 SITL 后端；
 - `simulation/gazebo/`：程序化生成的 30 m 标准轨距简化轨道场景；
 - `tools/`：轨道数据审计、YOLO 格式转换、预标注和训练入口；
@@ -47,7 +61,8 @@
 ./scripts/run_sitl_demo.sh
 ```
 
-默认任务起飞至 2 m，完成两轮“悬停、模拟识别、0.2 m/s 前飞 0.5 m、停稳”，然后退出 Offboard 并降落。SITL 后端必须显式传入 `--confirm-sitl`。
+默认视觉任务起飞至 2 m，反复执行“悬停、本地三帧识别、短控制脉冲、停稳”，
+然后退出 Offboard 并降落。SITL 后端必须显式传入 `--confirm-sitl`。
 
 详细启动和异常处理见 [`docs/simulation/README.md`](docs/simulation/README.md)。
 
@@ -68,7 +83,15 @@
 PYTHONPATH="$PWD:$PWD/src" python -m unittest discover -s tests -v
 ```
 
-当前轻量工程测试共 18 项，覆盖任务状态迁移、识别拒绝和取消后的安全降落、数据转换、序列级划分以及程序化轨道世界生成。
+当前轻量工程测试共 53 项，覆盖任务状态迁移、识别拒绝和取消后的安全降落、
+相机几何、动态投影、米制轨道拟合、控制限幅、Gazebo时间戳传输以及程序化轨道
+世界生成。
+
+## 进度报告
+
+- [项目进度报告（PDF）](output/pdf/uav-rail-vision-progress-20260917.pdf)
+- [LaTeX 源码](output/pdf/uav-rail-vision-progress-20260917.tex)
+- [像素到鸟瞰米制映射说明（PDF）](output/pdf/image-to-birdseye-pixel-mapping.pdf)
 
 ## 安全边界
 

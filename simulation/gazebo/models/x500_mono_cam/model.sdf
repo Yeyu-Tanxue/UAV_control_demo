@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.9">
+  <!--
+    This intentionally overrides PX4's model://x500_mono_cam through the
+    repository-first GZ_SIM_RESOURCE_PATH. The vehicle dynamics stay those
+    of PX4's stock X500; only the fixed camera mount is pitched down.
+  -->
+  <model name="x500_mono_cam">
+    <include merge="true">
+      <uri>model://x500</uri>
+    </include>
+    <include merge="true">
+      <uri>model://mono_cam</uri>
+      <pose>0.12 0 0.18 0 0.61086523820 0</pose>
+    </include>
+    <joint name="CameraJoint" type="fixed">
+      <parent>base_link</parent>
+      <child>camera_link</child>
+      <pose relative_to="base_link">0.12 0 0.18 0 0.61086523820 0</pose>
+    </joint>
+  </model>
+</sdf>

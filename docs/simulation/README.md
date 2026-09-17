@@ -1,5 +1,11 @@
 # 前两步仿真操作手册
 
+> 当前基于 YOLO 分割的视觉闭环架构、中心线算法和 PX4 控制流程见
+> [`visual-closed-loop-technical-overview.md`](visual-closed-loop-technical-overview.md)。
+> 最新的相机标定、动态轨面投影与米制闭环结果见
+> [`metric-closed-loop.md`](metric-closed-loop.md)。
+> 本文件以下内容保留为早期基线仿真操作记录。
+
 本手册只覆盖当前最小目标：
 
 1. PX4 SITL + Gazebo X500 + QGroundControl 基线；
@@ -95,7 +101,7 @@ CONNECTING -> TAKING_OFF
 - 起飞高度：2.0 m；
 - 模拟识别时间：3 s；
 - 前飞速度：0.2 m/s；
-- 每次前飞距离：0.5 m；
+- 每次前飞距离：2.0 m；
 - 停稳时间：2 s；
 - 循环次数：2。
 

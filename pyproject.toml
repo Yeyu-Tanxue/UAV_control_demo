@@ -12,9 +12,15 @@ dependencies = []
 
 [project.optional-dependencies]
 sim = ["mavsdk==3.15.3"]
+vision = [
+    "numpy>=1.26,<3",
+    "opencv-python>=4.10,<5",
+    "ultralytics==8.4.67",
+]
 
 [project.scripts]
 uav-demo = "uav_demo.cli:main"
+uav-vision-demo = "uav_demo.onboard_cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

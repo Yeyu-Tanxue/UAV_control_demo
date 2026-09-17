@@ -2,11 +2,14 @@ import argparse
 import asyncio
 import logging
 from collections.abc import Sequence
+from pathlib import Path
 
 from .backends.dry_run import DryRunController
 from .config import MissionConfig
 from .mission import MissionRunner
-from .recognition import TimedMockRecognizer
+from .recognition import GazeboCameraRecognizer, TimedMockRecognizer
+
+
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -33,8 +36,25 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--takeoff-altitude", type=float, default=2.0)
     parser.add_argument("--recognition-delay", type=float, default=3.0)
     parser.add_argument("--forward-speed", type=float, default=0.2)
-    parser.add_argument("--forward-distance", type=float, default=0.5)
+    parser.add_argument("--approach-distance", type=float, default=2.0)
+    parser.add_argument("--forward-distance", type=float, default=2.0)
     parser.add_argument("--settle-time", type=float, default=2.0)
+    parser.add_argument(
+        "--recognizer",
+        choices=("mock", "gazebo-camera"),
+        default="mock",
+        help="mock waits only; gazebo-camera saves all frames during recognition",
+    )
+    parser.add_argument(
+        "--camera-source-dir",
+        type=Path,
+        default=Path("/tmp/uav_demo_camera"),
+    )
+    parser.add_argument(
+        "--camera-output-dir",
+        type=Path,
+        default=Path("captures/hover_recognition"),
+    )
     parser.add_argument(
         "--dry-run-time-scale",
         type=float,
@@ -51,12 +71,15 @@ async def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> Non
         parser.error("--dry-run-time-scale must be non-negative")
     if args.backend == "mavsdk" and args.dry_run_time_scale != 0:
         parser.error("--dry-run-time-scale is only valid with the dry-run backend")
+    if args.recognizer == "gazebo-camera" and args.backend != "mavsdk":
+        parser.error("--recognizer gazebo-camera requires --backend mavsdk")
 
     config = MissionConfig(
         cycles=args.cycles,
         takeoff_altitude_m=args.takeoff_altitude,
         recognition_delay_s=args.recognition_delay,
         forward_speed_m_s=args.forward_speed,
+        approach_distance_m=args.approach_distance,
         forward_distance_m=args.forward_distance,
         settle_time_s=args.settle_time,
     )
@@ -73,7 +96,14 @@ async def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> Non
         controller = MavsdkPx4Controller(args.system_address)
         sleep = asyncio.sleep
 
-    recognizer = TimedMockRecognizer(config.recognition_delay_s, sleep)
+    if args.recognizer == "gazebo-camera":
+        recognizer = GazeboCameraRecognizer(
+            config.recognition_delay_s,
+            args.camera_source_dir,
+            args.camera_output_dir,
+        )
+    else:
+        recognizer = TimedMockRecognizer(config.recognition_delay_s, sleep)
     mission = MissionRunner(controller, recognizer, config, sleep)
     await mission.run()
 
