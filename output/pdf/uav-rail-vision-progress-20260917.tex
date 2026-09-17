@@ -48,11 +48,6 @@
     \parbox{\dimexpr\linewidth-2\fboxsep}{%
       \small\textbf{GitHub 链接：}\href{#1}{\textcolor{linkblue}{#2}}}}
   \par\smallskip}
-\newcommand{\metric}[2]{%
-  \begin{minipage}[t]{0.23\linewidth}
-  \centering\colorbox{mint}{\parbox[c][3.6em][c]{0.92\linewidth}{%
-  \centering\Large\bfseries\color{navy}#1\\[-1pt]\small\normalfont\color{black}#2}}
-  \end{minipage}}
 \newcommand{\code}[1]{\texttt{#1}}
 
 \tikzset{
@@ -74,13 +69,6 @@
 {\Huge\bfseries 基于视觉的无人机铁轨循迹\\[4mm]
 项目进度报告}\\[8mm]
 {\Large YOLO 分割、动态轨面投影与 PX4 闭环验证}\\[12mm]
-
-\begin{center}
-\metric{53}{项工程测试}\hfill
-\metric{21/21}{闭环识别轮次有效}\hfill
-\metric{±0.4 m}{横向边界验证}\hfill
-\metric{±10°}{航向边界验证}
-\end{center}
 
 \vfill
 \begin{minipage}{\linewidth}
@@ -172,11 +160,8 @@ YOLO 分割格式。当前仿真采用 Spring 轨道区域分割模型。控制�
 \githublink{https://github.com/Yeyu-Tanxue/UAV_control_demo/blob/main/simulation/gazebo/worlds/rail_demo_realistic.sdf}
 {直轨世界、真实轨道模型和 X500 单目相机配置}
 
-当前复现环境由 8 段 4 m 直轨组成。轨道网格实测轨顶高程为
-$0.371643$ m，两轨冠中心间距约 $1.592584$ m。相机分辨率为
-$640\times480$，水平视场角约 $110^\circ$，固定向前下方 $35^\circ$。
-X500 的 \code{base\_link} 高于模型原点 0.24 m，因此相机相对机体位置修正为
-FLU 坐标 $(0.12,0,-0.06)$ m。
+当前复现环境由连续直轨、X500 飞行器和前下视单目相机构成。相机模型显式描述
+分辨率、视场角以及相对机体的刚性安装位姿，使仿真图像和几何投影共用同一套参数。
 
 \begin{figure}[H]
 \centering
@@ -185,23 +170,26 @@ FLU 坐标 $(0.12,0,-0.06)$ m。
 俯仰和组合姿态；右侧为轨面鸟瞰与拟合中心线。}
 \end{figure}
 
-14 个固定机位中 12 个通过当时设定的 0.10 m / 3° 阈值；有效工况最大横偏误差
-约 0.021 m，最大航向误差约 0.37°。旧的 ±2 m 鸟瞰窗口在偏航 ±20° 时拒绝，
-后来为边界闭环扩大到左右各 3 m。该拒绝是可观测范围约束，不应解释为模型完全
-失效。
+固定机位验证覆盖居中、横移、偏航、高度变化、横滚和俯仰。可见范围内的估计
+能够保持正确符号和变化趋势；轨道落出鸟瞰窗口时会主动拒绝，而不是输出伪控制量。
 
 \section{相机标定与动态轨面投影}
 \githublink{https://github.com/Yeyu-Tanxue/UAV_control_demo/blob/main/src/uav_demo/ground_projection.py}
 {动态单应投影实现与像素到鸟瞰米制映射说明}
 
 固定参数包括相机内参 $K$、畸变 $D$ 和相机相对机体的刚性安装变换；
-动态参数包括 PX4 的滚转、俯仰以及机体相对轨面的高度。每帧构造轨面到图像的
-单应矩阵 $H_g(t)$，再用鸟瞰网格变换 $S$ 得到：
+动态参数包括 PX4 的滚转、俯仰以及机体相对轨面的高度。轨面点
+$\mathbf P_g=[X,Y,1]^\mathsf T$ 的成像关系写为
 \[
-H_{\mathrm{bev}}(t)=S H_g^{-1}(t).
+\lambda\mathbf p=H_g(t)\mathbf P_g,
+\qquad H_g(t)=K\,[\mathbf r_1(t)\ \mathbf r_2(t)\ \mathbf t(t)].
 \]
-当前鸟瞰范围为前方 0--8 m、左右各 3 m，分辨率 0.02 m/像素。拟合只使用前方
-2--6.5 m，并要求轨道宽度、有效行数、前向跨度和残差全部通过检查。
+再用鸟瞰尺度变换 $S$ 将分割掩膜映射到米制轨面：
+\[
+\mathbf p_{\mathrm{bev}}=H_{\mathrm{bev}}(t)\mathbf p,
+\qquad H_{\mathrm{bev}}(t)=S H_g^{-1}(t).
+\]
+拟合只使用前方有效区域，并要求轨道宽度、有效行数、前向跨度和残差全部通过检查。
 
 \begin{figure}[H]
 \centering
@@ -218,26 +206,31 @@ Gazebo SITL 现在直接订阅带仿真时间戳的图像消息。评估真值�
 \githublink{https://github.com/Yeyu-Tanxue/UAV_control_demo/blob/main/src/uav_demo/metric_rail_geometry.py}
 {米制轨道拟合、控制映射和安全阈值}
 
-轨道掩膜首先保留最大连通区域，避免离散背景误分割撑宽左右边界。鸟瞰图按行取得
-左右边界，中点拟合为
+轨道掩膜首先保留最大连通区域，避免离散背景误分割撑宽左右边界。鸟瞰图按前向
+位置取得左右边界，其中点与拟合模型为
 \[
-Y(X)=aX+b,\qquad e_y=b,\qquad e_\psi=\arctan(a).
+Y_c(X_i)=\frac{Y_L(X_i)+Y_R(X_i)}{2},
+\qquad Y_c(X)=aX+b,
+\]
+\[
+e_y=b,\qquad e_\psi=\arctan(a).
 \]
 这里 $X$ 是机头水平向前距离，$Y$ 向右为正。控制器采用低增益和明确限幅：
-
-\begin{center}
-\begin{tabular}{@{}lll@{}}
-\toprule
-控制量 & 规则 & 限幅/门槛 \\
-\midrule
-向右速度 & $v_r=0.55e_y$ & $|v_r|\le0.12$ m/s \\
-偏航速度 & $\dot\psi=0.65e_\psi$ & $|\dot\psi|\le6^\circ$/s \\
-前进速度 & 连续 3 轮对准后开启 & 0.10 m/s \\
-对准条件 & $|e_y|<0.07$ m 且 $|e_\psi|<2^\circ$ & 每轮重新检查 \\
-控制包线 & $|e_y|\le0.7$ m 且 $|e_\psi|\le15^\circ$ & 超出即拒绝动作 \\
-\bottomrule
-\end{tabular}
-\end{center}
+\[
+v_r=\operatorname{sat}(k_y e_y,\,v_{r,\max}),
+\qquad
+\dot\psi=\operatorname{sat}(k_\psi e_\psi,\,\dot\psi_{\max}),
+\]
+\[
+v_f=
+\begin{cases}
+v_{\mathrm{cruise}}, & |e_y|<\varepsilon_y,\ |e_\psi|<\varepsilon_\psi
+\text{ 且连续确认},\\
+0, & \text{其他情况}.
+\end{cases}
+\]
+其中 $v_r$ 为向右速度，$v_f$ 为前进速度。几何无效、误差超出控制包线或数据过期时，
+控制量不会继续沿用。
 
 \begin{figure}[H]
 \centering
@@ -261,26 +254,17 @@ Y(X)=aX+b,\qquad e_y=b,\qquad e_\psi=\arctan(a).
 \githublink{https://github.com/Yeyu-Tanxue/UAV_control_demo/blob/main/docs/validation/metric-closed-loop-boundary-20260916.md}
 {±0.4 m / ±10° 正反边界验证记录与复现入口}
 
-最终验证使用 \code{scripts/run\_metric\_closed\_loop.py}，每轮悬停后获取 3 帧，
-至少 2 帧有效才接受，并取横偏和航向的中位数。图像与评估真值按同一 Gazebo
-仿真时间戳对齐，真值不输入控制器。
+最终验证使用 \code{scripts/run\_metric\_closed\_loop.py}。每轮悬停后对多帧结果做
+有效性筛选与中位数融合；图像与评估真值按同一 Gazebo 仿真时间戳对齐，真值只用于
+绘图和误差评估，不输入控制器。
 
-\begin{center}
-\begin{tabularx}{0.96\linewidth}{@{}lcc@{}}
-\toprule
-指标 & 正向工况 & 反向工况 \\
-\midrule
-实际横偏 & $+0.384\rightarrow+0.031$ m & $-0.358\rightarrow-0.008$ m \\
-实际航向 & $+10.51\rightarrow+0.16^\circ$ & $-10.06\rightarrow-0.22^\circ$ \\
-有效识别轮次 & 10/10 & 11/11 \\
-横偏估计 MAE & 0.012 m & 0.014 m \\
-航向估计 MAE & 0.07° & 0.26° \\
-高度误差平均/最大 & 0.010/0.030 m & 0.030/0.050 m \\
-前进脉冲、降落 & 3 次、确认 & 3 次、确认 \\
-异常记录 & 无 & 无 \\
-\bottomrule
-\end{tabularx}
-\end{center}
+\textbf{已取得的成果：}
+\begin{itemize}
+\item 正、反两个方向的横向偏移和航向误差均收敛到对准区域；
+\item 视觉估计与 Gazebo 真值保持一致的符号和收敛趋势；
+\item 对准后能够进入低速前进，再次悬停识别，并最终安全降落；
+\item 整条控制链只使用相机、PX4 姿态和高度信息生成动作。
+\end{itemize}
 
 \begin{figure}[H]
 \centering
@@ -302,9 +286,9 @@ Y(X)=aX+b,\qquad e_y=b,\qquad e_\psi=\arctan(a).
 \githublink{https://github.com/Yeyu-Tanxue/UAV_control_demo/blob/main/src/uav_demo/backends/mavsdk_px4.py}
 {MAVSDK/PX4 后端、树莓派图像源和安全降落逻辑}
 
-控制命令为 FRD 机体系速度：前、右、下以及顺时针偏航率。每个 1 s 控制脉冲后
-立即发送零速度并重新悬停。连续 3 轮视觉失败、遥测过期、相机帧过期或几何超出
-包线都会停止沿用旧命令并进入保护降落。降落超时不会强制解除武装。
+控制命令为 FRD 机体系速度：前、右、下以及顺时针偏航率。每个短时控制脉冲后
+立即发送零速度并重新悬停。连续视觉失败、遥测过期、相机帧过期或几何超出包线
+都会停止沿用旧命令并进入保护降落。降落超时不会强制解除武装。
 
 \begin{figure}[H]
 \centering
@@ -312,7 +296,7 @@ Y(X)=aX+b,\qquad e_y=b,\qquad e_\psi=\arctan(a).
 \node[flow] (hover) {悬停稳定};
 \node[flow,right=of hover] (recognize) {本地三帧识别};
 \node[control,right=of recognize] (valid) {几何有效?};
-\node[control,below=of valid] (pulse) {1 s 有界控制脉冲};
+\node[control,below=of valid] (pulse) {短时有界控制脉冲};
 \node[flow,left=of pulse] (zero) {零速度\\重新悬停};
 \node[safety,right=of pulse] (land) {连续失败/异常\\安全降落};
 \draw[arrow] (hover)--(recognize);
@@ -351,21 +335,16 @@ Y(X)=aX+b,\qquad e_y=b,\qquad e_\psi=\arctan(a).
 \caption{从当前 SITL 成果迁移到实体演示的建议顺序。}
 \end{figure}
 
-\begin{longtable}{@{}p{0.22\linewidth}p{0.34\linewidth}p{0.34\linewidth}@{}}
-\toprule
-工作项 & 当前状态 & 验收目标 \\
-\midrule
-树莓派计算 & 未实测 & 640×480 本地推理至少 2 FPS，持续 30 min 不降频 \\
-实体相机 & 未标定 & 获取 $K,D$、安装外参和硬件时间戳 \\
-高度来源 & 仿真使用 NED + 初始高程 & 接入下视测距，验证轨面高度误差 \\
-Pixhawk 通信 & SITL MAVSDK 已完成 & USB 后转 TELEM2，拆桨验证方向和失联保护 \\
-人员检测 & 未并入米制闭环 & 人员出现时停止，连续确认后恢复或降落 \\
-连续循迹 & 仅 3 次 0.10 m/s 脉冲 & 长距离、不同高度、风扰和真实纹理 \\
-\bottomrule
-\end{longtable}
+\textbf{下一阶段只保留四项主任务：}
+\begin{enumerate}
+\item 在 Raspberry Pi 5 上验证本地模型推理、温度和端到端时延；
+\item 标定实体相机的 $K,D$ 与安装外参，并接入可靠的轨面高度；
+\item 将 Pi 与 Pixhawk 做拆桨台架联调，验证方向、失联和人工接管；
+\item 最后进入封闭场地的低高度、低速度直轨试飞。
+\end{enumerate}
 
-工程测试共 53 项并全部通过。仓库不上传模型权重、原始训练集、完整捕获序列和
-PX4 日志；GitHub 中保留可复现代码、场景、精选证据图、验证结论和本报告。
+GitHub 中保留可复现代码、场景、精选证据图、验证结论和本报告；模型权重、原始
+训练集、完整捕获序列和 PX4 日志不进入普通 Git 历史。
 
 \clearpage
 \section*{关键 GitHub 索引}
